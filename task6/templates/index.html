@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Herd Detection System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInDown 1s;
+        }
+
+        .header-title {
+            font-size: 2.5em;
+            color: #1e3c72;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .upload-area {
+            border: 3px dashed #1e3c72;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            background: #e3f2fd;
+            border-color: #2a5298;
+            transform: translateY(-5px);
+        }
+
+        .upload-area i {
+            font-size: 80px;
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+
+        .upload-area h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .result-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .animal-count {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1e3c72;
+            color: #1e3c72;
+        }
+
+        .btn-outline:hover {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .feature-badge {
+            background: #e3f2fd;
+            color: #1e3c72;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+
+        .alert-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-card animate__animated animate__slideInDown">
+            <div class="text-center">
+                <i class="fas fa-paw" style="font-size: 60px; color: #1e3c72; margin-bottom: 20px;"></i>
+                <h1 class="header-title">🐾 Animal Herd Detection System 🐾</h1>
+                <p class="header-subtitle">
+                    Advanced AI-powered system to detect and track animal herds in images and videos
+                </p>
+                <div class="mt-4">
+                    <span class="feature-badge"><i class="fas fa-check-circle"></i> Real-time Detection</span>
+                    <span class="feature-badge"><i class="fas fa-map-marker-alt"></i> Map Integration</span>
+                    <span class="feature-badge"><i class="fas fa-video"></i> Video Support</span>
+                    <span class="feature-badge"><i class="fas fa-chart-line"></i> Herd Analysis</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-card animate__animated animate__fadeInUp">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Drag & Drop or Click to Upload</h3>
+                <p>Supported formats: JPG, PNG, MP4, AVI, MOV (Max: 50MB)</p>
+                
+                <!-- File input (hidden) -->
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.mp4,.avi,.mov" style="display: none;">
+                
+                <!-- Browse button -->
+                <button class="btn btn-custom" onclick="document.getElementById('fileInput').click();">
+                    <i class="fas fa-folder-open"></i> Browse Files
+                </button>
+            </div>
+
+            <!-- File info display -->
+            <div class="file-info" id="fileInfo">
+                <i class="fas fa-file"></i> <span id="fileName"></span>
+                <button class="btn btn-sm btn-danger float-end" onclick="clearFile()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Loading spinner -->
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <h4>Processing your file...</h4>
+                <p class="text-muted">This may take a few moments</p>
+                <div class="progress mt-3" style="height: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         style="width: 100%; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card" id="result">
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <!-- Success Alert -->
+                    <div class="alert alert-success alert-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i> 
+                        <span id="messageText">Detection complete!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Image Column -->
+                <div class="col-md-6">
+                    <h4><i class="fas fa-image"></i> Detection Result</h4>
+                    <div class="text-center">
+                        <img id="resultImage" class="result-image" src="" alt="Detection Result">
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="stats-card mt-4">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <i class="fas fa-paw fa-2x"></i>
+                                <div class="animal-count" id="animalCount">0</div>
+                                <div>Animals Detected</div>
+                            </div>
+                            <div class="col-6">
+                                <i class="fas fa-map-marker-alt fa-2x"></i>
+                                <div class="mt-3" id="locationDisplay">
+                                    <strong>Location:</strong><br>
+                                    <span id="locationName">Detecting...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Type Badge -->
+                    <div class="text-center mt-3">
+                        <span class="badge bg-info" id="fileTypeBadge">Image</span>
+                    </div>
+                </div>
+
+                <!-- Map Column -->
+                <div class="col-md-6">
+                    <h4><i class="fas fa-map"></i> Alert Location</h4>
+                    <div id="mapContainer" class="map-container"></div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-custom" onclick="window.location.reload()">
+                            <i class="fas fa-redo"></i> Analyze New File
+                        </button>
+                        <button class="btn btn-outline" onclick="shareResults()">
+                            <i class="fas fa-share-alt"></i> Share Alert
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-info-circle"></i> Detection Details</h5>
+                        </div>
+                        <div class="card-body" id="detectionDetails">
+                            <p class="text-muted">Processing complete. View results above.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Animal Herd Detection System | AI-Powered Conservation Technology</p>
+            <p>
+                <small>
+                    <i class="fas fa-map-pin"></i> Real-time location tracking | 
+                    <i class="fas fa-chart-bar"></i> Herd analysis | 
+                    <i class="fas fa-bell"></i> Instant alerts
+                </small>
+            </p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const resultImage = document.getElementById('resultImage');
+        const animalCount = document.getElementById('animalCount');
+        const messageText = document.getElementById('messageText');
+        const mapContainer = document.getElementById('mapContainer');
+        const locationName = document.getElementById('locationName');
+        const fileTypeBadge = document.getElementById('fileTypeBadge');
+        const detectionDetails = document.getElementById('detectionDetails');
+
+        // Event Listeners
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#e3f2fd';
+            uploadArea.style.borderColor = '#2a5298';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9fa';
+            uploadArea.style.borderColor = '#1e3c72';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9fa';
+            uploadArea.style.borderColor = '#1e3c72';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // File selection handler
+        function handleFileSelect(file) {
+            // Check file size (50MB limit)
+            if (file.size > 50 * 1024 * 1024) {
+                alert('File size exceeds 50MB limit. Please choose a smaller file.');
+                return;
+            }
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4', 'video/avi', 'video/quicktime'];
+            if (!allowedTypes.includes(file.type) && 
+                !file.name.match(/\.(jpg|jpeg|png|mp4|avi|mov)$/i)) {
+                alert('Invalid file type. Please upload JPG, PNG, MP4, AVI, or MOV files.');
+                return;
+            }
+
+            // Display file info
+            fileName.textContent = file.name;
+            fileInfo.style.display = 'block';
+            
+            // Upload file
+            uploadFile(file);
+        }
+
+        // Clear selected file
+        function clearFile() {
+            fileInput.value = '';
+            fileInfo.style.display = 'none';
+        }
+
+        // Upload file to server
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Show loading, hide upload area and result
+            uploadArea.style.display = 'none';
+            fileInfo.style.display = 'none';
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            // Determine file type for badge
+            if (file.type.includes('image')) {
+                fileTypeBadge.textContent = '📷 Image';
+                fileTypeBadge.className = 'badge bg-success';
+            } else if (file.type.includes('video')) {
+                fileTypeBadge.textContent = '🎥 Video';
+                fileTypeBadge.className = 'badge bg-warning text-dark';
+            }
+
+            // Make API call
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    // Display results
+                    result.style.display = 'block';
+                    
+                    // Update UI with data
+                    resultImage.src = data.image_url || 'https://via.placeholder.com/400x300?text=No+Preview';
+                    animalCount.textContent = data.animal_count || 0;
+                    messageText.textContent = data.message || 'Detection complete!';
+                    locationName.textContent = data.location || 'Unknown location';
+                    
+                    // Update map
+                    if (data.map_html) {
+                        mapContainer.innerHTML = data.map_html;
+                    }
+                    
+                    // Update detection details
+                    let detailsHtml = '';
+                    if (data.file_type === 'image') {
+                        detailsHtml = `
+                            <p><strong>File Type:</strong> Image</p>
+                            <p><strong>Animals Detected:</strong> ${data.animal_count}</p>
+                            <p><strong>Detection Time:</strong> ${new Date().toLocaleString()}</p>
+                        `;
+                        
+                        if (data.detections && data.detections.length > 0) {
+                            detailsHtml += '<p><strong>Detection Details:</strong></p><ul>';
+                            data.detections.forEach(d => {
+                                detailsHtml += `<li>Animal ${d.id}: Position (${d.x}, ${d.y})</li>`;
+                            });
+                            detailsHtml += '</ul>';
+                        }
+                    } else if (data.file_type === 'video') {
+                        detailsHtml = `
+                            <p><strong>File Type:</strong> Video</p>
+                            <p><strong>Total Animals Detected:</strong> ${data.animal_count}</p>
+                            <p><strong>Average per Frame:</strong> ${data.avg_animals_per_frame || 0}</p>
+                            <p><strong>Detection Time:</strong> ${new Date().toLocaleString()}</p>
+                        `;
+                    }
+                    
+                    detectionDetails.innerHTML = detailsHtml;
+                    
+                    // Scroll to results
+                    result.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Show success animation
+                    $('.alert-success').addClass('animate__animated animate__pulse');
+                    
+                } else {
+                    // Show error
+                    alert('Error: ' + (data.error || 'Unknown error occurred'));
+                    uploadArea.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                uploadArea.style.display = 'block';
+                alert('Error uploading file: ' + error.message);
+            });
+        }
+
+        // Share results function
+        function shareResults() {
+            const text = `Animal Detection Alert! Found ${animalCount.textContent} animals.`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Animal Detection Alert',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback - copy to clipboard
+                navigator.clipboard.writeText(text);
+                alert('Results copied to clipboard!');
+            }
+        }
+
+        // Get current location on page load
+        window.addEventListener('load', () => {
+            fetch('/api/location')
+                .then(response => response.json())
+                .then(data => {
+                    locationName.textContent = data.location || 'Location detected';
+                })
+                .catch(error => {
+                    console.error('Location error:', error);
+                });
+        });
+
+        // Auto-refresh location every minute
+        setInterval(() => {
+            fetch('/api/location')
+                .then(response => response.json())
+                .then(data => {
+                    locationName.textContent = data.location || 'Location detected';
+                })
+                .catch(error => {
+                    console.error('Location error:', error);
+                });
+        }, 60000);
+    </script>
+</body>
+</html>
