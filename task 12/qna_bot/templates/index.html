@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI QnA Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #7c6af7;
+    --accent2: #f76a8c;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --card: #16161f;
+    --glow: rgba(124,106,247,0.25);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,247,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,247,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(124,106,247,0.15);
+    border: 1px solid rgba(124,106,247,0.4);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── SEARCH BOX ── */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .search-box {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 140px 18px 22px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .search-box:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+  .search-box::placeholder { color: var(--muted); }
+
+  .btn-search {
+    position: absolute;
+    right: 8px; top: 8px; bottom: 8px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 22px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    letter-spacing: 0.5px;
+  }
+  .btn-search:hover { background: #6a59e0; }
+  .btn-search:active { transform: scale(0.97); }
+  .btn-search:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .controls label { color: var(--muted); font-size: 12px; }
+  .controls select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 0.5px;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── STATUS / LOADER ── */
+  #status {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    min-height: 20px;
+    margin-bottom: 24px;
+  }
+  .loader {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULTS ── */
+  #results { display: flex; flex-direction: column; gap: 14px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    position: relative;
+    animation: fadeUp .35s ease both;
+    transition: border-color .2s, transform .2s;
+    overflow: hidden;
+  }
+  .result-card:hover {
+    border-color: rgba(124,106,247,0.5);
+    transform: translateY(-2px);
+  }
+  .result-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+    border-radius: 3px 0 0 3px;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(12px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .rank {
+    background: rgba(124,106,247,0.15);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(124,106,247,0.3);
+  }
+  .topic-tag {
+    background: rgba(247,106,140,0.1);
+    color: var(--accent2);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(247,106,140,0.25);
+  }
+  .dist {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .card-question {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .card-answer {
+    color: #a8a8be;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 42px; margin-bottom: 14px; }
+  .empty h3 { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 18px; }
+  .empty p { font-size: 13px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    margin-top: 64px;
+    color: var(--muted);
+    font-size: 12px;
+    opacity: .6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Semantic Search · MiniLM · FAISS</div>
+    <h1>AI QnA Bot</h1>
+    <p class="subtitle">Ask anything — powered by sentence embeddings &amp; vector similarity</p>
+  </header>
+
+  <div class="search-wrapper">
+    <input
+      id="query"
+      class="search-box"
+      type="text"
+      placeholder="e.g. What is deep learning?"
+      autocomplete="off"
+    />
+    <button class="btn-search" id="searchBtn" onclick="doSearch()">Search</button>
+  </div>
+
+  <div class="controls">
+    <label>Top results:</label>
+    <select id="topK">
+      <option value="3">3</option>
+      <option value="5" selected>5</option>
+      <option value="10">10</option>
+    </select>
+
+    <div class="chips">
+      <span class="chip" onclick="setQuery('What is machine learning?')">Machine Learning</span>
+      <span class="chip" onclick="setQuery('How to create a route in Flask?')">Flask Routes</span>
+      <span class="chip" onclick="setQuery('What is a neural network?')">Neural Networks</span>
+      <span class="chip" onclick="setQuery('What is numpy?')">NumPy</span>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="results">
+    <div class="empty">
+      <div class="empty-icon">🔍</div>
+      <h3>Start searching</h3>
+      <p>Type a question above or click a topic chip</p>
+    </div>
+  </div>
+
+  <footer>Lab 12 · Programming for Artificial Intelligence · Hugging Face MiniLM + FAISS</footer>
+</div>
+
+<script>
+  const queryEl   = document.getElementById('query');
+  const statusEl  = document.getElementById('status');
+  const resultsEl = document.getElementById('results');
+  const searchBtn = document.getElementById('searchBtn');
+  const topKEl    = document.getElementById('topK');
+
+  queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  function setQuery(q) {
+    queryEl.value = q;
+    queryEl.focus();
+    doSearch();
+  }
+
+  async function doSearch() {
+    const query = queryEl.value.trim();
+    if (!query) return;
+
+    searchBtn.disabled = true;
+    statusEl.innerHTML = '<span class="loader"></span> Searching vector index...';
+    resultsEl.innerHTML = '';
+
+    try {
+      const res = await fetch('/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, k: parseInt(topKEl.value) })
+      });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      statusEl.textContent = `${data.results.length} results for "${data.query}"`;
+      resultsEl.innerHTML = data.results.map((r, i) => `
+        <div class="result-card" style="animation-delay:${i * 0.07}s">
+          <div class="card-meta">
+            <span class="rank">#${r.rank}</span>
+            <span class="topic-tag">${r.topic}</span>
+            <span class="dist">dist: ${r.distance}</span>
+          </div>
+          <div class="card-question">${escHtml(r.question)}</div>
+          <div class="card-answer">${escHtml(r.answer)}</div>
+        </div>
+      `).join('');
+
+    } catch (err) {
+      statusEl.textContent = 'Error: ' + err.message;
+      resultsEl.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>Something went wrong</h3><p>${escHtml(err.message)}</p></div>`;
+    } finally {
+      searchBtn.disabled = false;
+    }
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

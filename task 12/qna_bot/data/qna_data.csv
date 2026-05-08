@@ -1,0 +1,21 @@
+topic,question,answer
+Python,What is Python?,Python is a high-level interpreted programming language known for its simple syntax and readability. It supports multiple programming paradigms including procedural object-oriented and functional programming.
+Python,What is a list in Python?,A list is an ordered mutable collection in Python that can hold elements of different types. It is defined using square brackets e.g. my_list = [1 2 3].
+Python,What is the difference between a list and a tuple?,A list is mutable meaning its elements can be changed after creation. A tuple is immutable meaning once created its elements cannot be modified. Tuples use parentheses while lists use square brackets.
+Python,What is a dictionary in Python?,A dictionary is an unordered collection of key-value pairs. Keys must be unique and immutable. It is defined using curly braces e.g. d = {'name': 'Ali' 'age': 20}.
+Python,What is a lambda function?,A lambda function is an anonymous single-expression function defined with the lambda keyword. Example: add = lambda x y: x + y.
+AI,What is Artificial Intelligence?,Artificial Intelligence is the simulation of human intelligence by machines. It includes learning reasoning and self-correction to perform tasks that normally require human intelligence.
+AI,What is Machine Learning?,Machine Learning is a subset of AI that enables computers to learn from data and improve performance over time without being explicitly programmed.
+AI,What is Deep Learning?,Deep Learning is a subset of Machine Learning that uses neural networks with many layers to learn patterns in large amounts of data. It powers applications like image recognition and speech processing.
+AI,What is Natural Language Processing?,Natural Language Processing or NLP is a branch of AI that deals with the interaction between computers and human language. It enables machines to read understand and generate text.
+AI,What is a neural network?,A neural network is a computational model inspired by the human brain consisting of layers of interconnected nodes or neurons that process data and learn patterns.
+Data Science,What is data preprocessing?,Data preprocessing is the process of cleaning and transforming raw data before analysis. It includes handling missing values removing duplicates normalizing data and encoding categorical variables.
+Data Science,What is FAISS?,FAISS stands for Facebook AI Similarity Search. It is a library for efficient similarity search and clustering of dense vectors useful for building search engines and recommendation systems.
+Data Science,What is a vector embedding?,A vector embedding is a numerical representation of text or other data in a continuous vector space. Similar items have vectors that are close together. They are used in NLP for semantic search.
+Data Science,What is pandas?,Pandas is a Python library for data manipulation and analysis. It provides data structures like DataFrame and Series to work with structured data efficiently.
+Data Science,What is numpy?,NumPy is a Python library for numerical computing. It provides support for arrays matrices and mathematical functions. It is the foundation of most scientific Python libraries.
+Flask,What is Flask?,Flask is a lightweight web framework for Python. It is used to build web applications and APIs. Flask follows the WSGI standard and is known for its simplicity and flexibility.
+Flask,How do you create a route in Flask?,In Flask a route is created using the @app.route() decorator. Example: @app.route('/home') def home(): return 'Hello World'.
+Flask,What is a REST API?,A REST API is an interface that follows Representational State Transfer principles. It uses HTTP methods like GET POST PUT DELETE to perform operations on resources.
+Flask,What is JSON?,JSON stands for JavaScript Object Notation. It is a lightweight data format used to exchange data between a server and a client. Python's json module can encode and decode JSON.
+Flask,How do you handle POST requests in Flask?,POST requests in Flask are handled by specifying methods=['POST'] in the route decorator and accessing form data or JSON via request.form or request.get_json().
